@@ -1,0 +1,33 @@
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: my-database
+  namespace: demo-system
+  labels:
+    app: demo
+    group: database
+    role: data-manager
+
+spec:
+  volumes:
+    - name:  data-storage
+      persistentVolumeClaim:
+        claimName: my-database-pvc
+  containers:
+    - name: database
+      image: mysql/mysql-server:latest
+      env:
+        - name: MYSQL_USER
+          value: demo-user
+        - name: MYSQL_PASSWORD
+          value: D3m0-P4ssW0rD?
+        - name: MYSQL_DATABASE
+          value: demo-database
+      volumeMounts:
+        - name: data-storage
+          mountPath: /var/lib/mysql  
+      resources:
+        limits:
+          memory: "1024Mi"
+          cpu: "500m"
