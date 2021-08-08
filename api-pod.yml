@@ -17,12 +17,14 @@ spec:
       limits:
         memory: "1024Mi"
         cpu: "500m"
-    command:
-      - "apk add --no-cache mysql-client && mysql -u $MYSQL_USER -p{$MYSQL_PASSWORD} -h my-database-service.demo-system.svc.cluster.local"
+    command: [ "/bin/sh" ]
+    args:
+      - "-c"
+      - "apk add --no-cache mysql-client && mysql -u $MYSQL_USER -p{$MYSQL_PASSWORD} -h $MYSQL_HOST"
     env:
       - name: MYSQL_USER
         value: demo-user
       - name: MYSQL_PASSWORD
         value: D3m0-P4ssW0rD?
-      - name: MYSQL_DATABASE
-        value: demo-database
+      - name: MYSQL_HOST
+        value: my-database-service

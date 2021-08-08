@@ -9,10 +9,10 @@ metadata:
     group: database
     role: data-service
 spec:
+  type: NodePort
   ports:
     - port: 3306
   selector:
     app: demo
     group: database
     role: data-manager
-  clusterIP: None

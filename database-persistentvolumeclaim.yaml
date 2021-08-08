@@ -9,8 +9,9 @@ metadata:
     group: database
     role: data-storage
 spec:
+  storageClassName: manual
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: 20Gi
+      storage: 5Gi
