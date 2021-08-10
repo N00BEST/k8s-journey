@@ -1,0 +1,76 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+  namespace: demo-system
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: demo
+      group: api
+      role: api-manager
+  # Pod template 
+  template:
+    metadata:
+      namespace: demo-system
+      labels:
+        app: demo
+        group: api
+        role: api-manager
+
+    spec:
+      containers:
+      - name: api-pod
+        imagePullPolicy: "IfNotPresent"
+        image: my-app:latest
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        command: [ "/app" ]
+        env:
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: my-database-secret
+                key: username
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: my-database-secret
+                key: password
+          - name: MYSQL_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: my-database-configmap
+                key: host
+          - name: MYSQL_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: my-database-configmap
+                key: port
+          - name: MYSQL_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: my-database-configmap
+                key: database
+        ports:
+          - name: server-port
+            containerPort: 8000
+
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: server-port
+          failureThreshold: 2
+          periodSeconds: 5
+        
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: server-port
+          failureThreshold: 2
+          periodSeconds: 10
+          initialDelaySeconds: 2

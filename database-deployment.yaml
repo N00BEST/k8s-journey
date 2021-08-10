@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-database-deployment
+  namespace: demo-system
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: demo
+      group: database
+      role: data-manager
+  # Pod template 
+  template:
+    metadata: 
+      name: my-database
+      namespace: demo-system
+      labels:
+        app: demo
+        group: database
+        role: data-manager
+
+    spec:
+      volumes:
+        - name:  data-storage
+          persistentVolumeClaim:
+            claimName: my-database-pvc
+      containers:
+        - name: database
+          image: mysql/mysql-server:latest
+          env:
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: my-database-secret
+                  key: username
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: my-database-secret
+                  key: password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: my-database-configmap
+                  key: database
+          volumeMounts:
+            - name: data-storage
+              mountPath: /var/lib/mysql  
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 3306
+              name: mysql
