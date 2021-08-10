@@ -29,7 +29,7 @@ spec:
           mountPath: /var/lib/mysql  
       resources:
         limits:
-          memory: "1024Mi"
+          memory: "256Mi"
           cpu: "500m"
       ports:
         - containerPort: 3306

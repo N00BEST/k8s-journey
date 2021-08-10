@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type DatabaseConnection struct {
@@ -12,11 +14,15 @@ type DatabaseConnection struct {
 }
 
 func getConnectionCreds() string {
+	user := os.Getenv("MYSQL_USER")
+	host := os.Getenv("MYSQL_HOST")
+	port := os.Getenv("MYSQL_PORT")
+	log.Println(fmt.Sprintf("Trying to connect to %s@%s:%s", user, host, port))
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
-		os.Getenv("MYSQL_USER"),
+		user,
 		os.Getenv("MYSQL_PASSWORD"),
-		os.Getenv("MYSQL_HOST"),
-		os.Getenv("MYSQL_PORT"),
+		host,
+		port,
 		os.Getenv("MYSQL_DATABASE"))
 }
 

@@ -16,7 +16,7 @@ spec:
     image: my-app:latest
     resources:
       limits:
-        memory: "1024Mi"
+        memory: "256Mi"
         cpu: "500m"
     command: [ "/app" ]
     env:
@@ -30,3 +30,21 @@ spec:
         value: "3306"
       - name: MYSQL_DATABASE
         value: demo-database
+    ports:
+      - name: server-port
+        containerPort: 80
+
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: server-port
+      failureThreshold: 2
+      periodSeconds: 5
+    
+    livenessProbe:
+      httpGet:
+        path: /live
+        port: server-port
+      failureThreshold: 2
+      periodSeconds: 10
+      initialDelaySeconds: 2

@@ -12,6 +12,7 @@ COPY go.sum go.sum
 # Copy the go source
 COPY books.go books.go
 COPY database.go database.go
+COPY probes.go probes.go
 COPY main.go main.go
 
 # Build
