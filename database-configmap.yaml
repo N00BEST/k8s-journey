@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-database-configmap
+  namespace: demo-system
+data:
+  host: my-database-service
+  port: "3306"
+  database: demo-database

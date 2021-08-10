@@ -21,18 +21,33 @@ spec:
     command: [ "/app" ]
     env:
       - name: MYSQL_USER
-        value: demo-user
+        valueFrom:
+          secretKeyRef:
+            name: my-database-secret
+            key: username
       - name: MYSQL_PASSWORD
-        value: D3m0-P4ssW0rD?
+        valueFrom:
+          secretKeyRef:
+            name: my-database-secret
+            key: password
       - name: MYSQL_HOST
-        value: my-database-service
+        valueFrom:
+          configMapKeyRef:
+            name: my-database-configmap
+            key: host
       - name: MYSQL_PORT
-        value: "3306"
+        valueFrom:
+          configMapKeyRef:
+            name: my-database-configmap
+            key: port
       - name: MYSQL_DATABASE
-        value: demo-database
+        valueFrom:
+          configMapKeyRef:
+            name: my-database-configmap
+            key: database
     ports:
       - name: server-port
-        containerPort: 80
+        containerPort: 8000
 
     readinessProbe:
       httpGet:
