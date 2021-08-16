@@ -1,4 +1,142 @@
-# Generated: 2021-08-14 11:11:45
+# Generated: 2021-08-16 16:47:09
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-database-secret
+  namespace: demo-system
+type: Opaque
+data:
+  username: ZGVtby11c2Vy
+  password: RDNtMC1QNHNzVzByRD8=
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-database-configmap
+  namespace: demo-system
+data:
+  host: my-database-service
+  port: "3306"
+  database: demo-database
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-database-volume
+  namespace: demo-system
+  labels:
+    app: demo
+    group: database
+    role: data-storage
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/tmp/data"
+  persistentVolumeReclaimPolicy: Delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-database-pvc
+  namespace: demo-system
+  labels:
+    app: demo
+    group: database
+    role: data-storage
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-database-deployment
+  namespace: demo-system
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: demo
+      group: database
+      role: data-manager
+  # Pod template 
+  template:
+    metadata: 
+      name: my-database
+      namespace: demo-system
+      labels:
+        app: demo
+        group: database
+        role: data-manager
+
+    spec:
+      volumes:
+        - name:  data-storage
+          persistentVolumeClaim:
+            claimName: my-database-pvc
+      containers:
+        - name: database
+          image: mysql/mysql-server:latest
+          env:
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: my-database-secret
+                  key: username
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: my-database-secret
+                  key: password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: my-database-configmap
+                  key: database
+          volumeMounts:
+            - name: data-storage
+              mountPath: /var/lib/mysql  
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 3306
+              name: mysql
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-database-service
+  namespace: demo-system
+  labels:
+    app: demo
+    group: database
+    role: data-service
+spec:
+  type: NodePort
+  ports:
+    - port: 3306
+  selector:
+    app: demo
+    group: database
+    role: data-manager
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -94,136 +232,3 @@ spec:
     app: demo
     group: api
     role: api-manager
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: my-database-configmap
-  namespace: demo-system
-data:
-  host: my-database-service
-  port: "3306"
-  database: demo-database
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-database-deployment
-  namespace: demo-system
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: demo
-      group: database
-      role: data-manager
-  # Pod template 
-  template:
-    metadata: 
-      name: my-database
-      namespace: demo-system
-      labels:
-        app: demo
-        group: database
-        role: data-manager
-
-    spec:
-      volumes:
-        - name:  data-storage
-          persistentVolumeClaim:
-            claimName: my-database-pvc
-      containers:
-        - name: database
-          image: mysql/mysql-server:latest
-          env:
-            - name: MYSQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: my-database-secret
-                  key: username
-            - name: MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: my-database-secret
-                  key: password
-            - name: MYSQL_DATABASE
-              valueFrom:
-                configMapKeyRef:
-                  name: my-database-configmap
-                  key: database
-          volumeMounts:
-            - name: data-storage
-              mountPath: /var/lib/mysql  
-          resources:
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
-          ports:
-            - containerPort: 3306
-              name: mysql
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: my-database-pvc
-  namespace: demo-system
-  labels:
-    app: demo
-    group: database
-    role: data-storage
-spec:
-  storageClassName: manual
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 5Gi
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: my-database-secret
-  namespace: demo-system
-type: Opaque
-data:
-  username: ZGVtby11c2Vy
-  password: RDNtMC1QNHNzVzByRD8=
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: my-database-service
-  namespace: demo-system
-  labels:
-    app: demo
-    group: database
-    role: data-service
-spec:
-  type: NodePort
-  ports:
-    - port: 3306
-  selector:
-    app: demo
-    group: database
-    role: data-manager
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: my-database-volume
-  namespace: demo-system
-  labels:
-    app: demo
-    group: database
-    role: data-storage
-spec:
-  storageClassName: manual
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteMany
-  hostPath:
-    path: "/tmp/data"
-  persistentVolumeReclaimPolicy: Delete
