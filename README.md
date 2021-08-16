@@ -67,7 +67,7 @@ To check if the REST API deployed properly, you can do a port-forward and try co
 kubectl port-forward -n demo-system service/my-api-service 8080:80
 ```
 
-Connect to the REST API in the `localhost:8080` whether from your browser or a client such as [Postman](#) to make your HTTP requests.
+Connect to the REST API in the `localhost:8080` whether from your browser or a client such as [Postman](https://www.postman.com/) to make your HTTP requests.
 The available routes are:
 
 * **Create**: `POST /books`
