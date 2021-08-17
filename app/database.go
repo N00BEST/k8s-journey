@@ -37,10 +37,30 @@ func (db *DatabaseConnection) OpenConnection() error {
 
 	if err != nil {
 		db.isConnectionEstablished = false
-	} else {
-		err = db.Connection.Ping()
-		db.isConnectionEstablished = err == nil
+		return err
 	}
+
+	err = db.Connection.Ping()
+	db.isConnectionEstablished = err == nil
+
+	if err != nil {
+		return err
+	}
+
+	err = db.migrate()
+
+	return err
+}
+
+func (db *DatabaseConnection) migrate() error {
+	_, err := db.Connection.Exec(`create table if not exists books
+	(
+		id     int unsigned auto_increment
+			primary key,
+		title  text null,
+		author text null
+	);
+	`)
 
 	return err
 }
